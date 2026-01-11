@@ -205,6 +205,14 @@ Status: FAIL (capability expansion detected)
 
 AgentLint is purpose-built for AI agent configs. General linters miss agent-specific risks.
 
+## Integrations
+
+| Tool | Link |
+|------|------|
+| **VS Code** | [agentlint-vscode](https://github.com/akz4ol/agentlint-vscode) |
+| **GitHub Action** | [agentlint-action](https://github.com/akz4ol/agentlint-action) |
+| **Pre-commit** | [docs/pre-commit.md](docs/pre-commit.md) |
+
 ## Roadmap
 
 - [x] Claude Code support (`.claude/`, `CLAUDE.md`)
@@ -212,8 +220,10 @@ AgentLint is purpose-built for AI agent configs. General linters miss agent-spec
 - [x] 20 security rules
 - [x] SARIF output for GitHub
 - [x] Diff mode
-- [ ] VS Code extension
-- [ ] GitHub Action (native)
+- [x] VS Code extension
+- [x] GitHub Action (native)
+- [x] Pre-commit hook
+- [ ] Auto-fix for common issues
 - [ ] Policy-as-code engine
 - [ ] Signed skill packs
 - [ ] Agent config registry
@@ -223,6 +233,7 @@ AgentLint is purpose-built for AI agent configs. General linters miss agent-spec
 - [CLI Reference](docs/cli.md)
 - [FAQ](docs/faq.md)
 - [Architecture](docs/design.md)
+- [Pre-commit Hook](docs/pre-commit.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security Policy](SECURITY.md)
 

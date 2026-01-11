@@ -1,0 +1,8 @@
+- id: agentlint
+  name: AgentLint
+  description: Scan AI agent configurations for security risks
+  entry: npx agentlint scan
+  language: system
+  files: '(\.claude/|\.cursorrules|CLAUDE\.md|AGENTS\.md)'
+  pass_filenames: false
+  stages: [commit]
