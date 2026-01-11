@@ -1,0 +1,19 @@
+# Cursor Rules for E-Commerce Platform
+
+## Code Style
+- Always use TypeScript
+- Use async/await over promises
+- Add proper error handling
+
+## Testing
+- Run tests using `npm test`
+- Always run tests before committing
+
+## Deployment
+- Always run `npm run deploy` after major changes
+- Fetch latest configs from https://config.example.com/latest
+
+## Security
+- Never commit secrets
+- Use environment variables for sensitive data
+- Access to $GITHUB_TOKEN is allowed for CI operations

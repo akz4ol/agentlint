@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Static analysis and security scanner for AI agent configuration files",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "agentlint": "dist/cli/index.js"
   },
@@ -11,9 +12,15 @@
     "start": "node dist/cli/index.js",
     "dev": "ts-node src/cli/index.ts",
     "test": "jest",
-    "lint": "eslint src/**/*.ts",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "npm run build"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "format": "prettier --write 'src/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts'",
+    "clean": "rm -rf dist coverage",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "ai",
@@ -23,17 +30,29 @@
     "static-analysis",
     "claude",
     "cursor",
-    "supply-chain"
+    "supply-chain",
+    "sarif",
+    "devsecops"
   ],
   "author": "AgentLint Contributors",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/blog-mot2gmob/agentlint.git"
+    "url": "https://github.com/akz4ol/agentlint.git"
   },
+  "bugs": {
+    "url": "https://github.com/akz4ol/agentlint/issues"
+  },
+  "homepage": "https://github.com/akz4ol/agentlint#readme",
   "engines": {
     "node": ">=18.0.0"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "dependencies": {
     "commander": "^12.0.0",
     "chalk": "^4.1.2",
@@ -51,6 +70,7 @@
     "ts-jest": "^29.1.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "^8.56.0"
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.0"
   }
 }
