@@ -53,6 +53,12 @@ agentlint scan --permissions-only
 | `--tool <tool>` | Tool mode: `auto`, `claude`, `cursor` |
 | `--emit-ir` | Include IR in JSON output |
 | `--permissions-only` | Output only permission manifest |
+| `--fix` | Auto-fix fixable issues |
+| `--dry-run` | Show what would be fixed without changes |
+| `--baseline <path>` | Path to baseline file |
+| `--update-baseline` | Create/update baseline with findings |
+| `--ignore-baseline` | Ignore baseline, report all findings |
+| `--prune-baseline` | Remove fixed findings from baseline |
 
 ### `agentlint diff <base> <target>`
 
@@ -254,6 +260,35 @@ agentlint scan --ci --format json --output agentlint.json
 
 # Exit code for scripting
 agentlint scan --ci && echo "Passed" || echo "Failed"
+```
+
+### Auto-Fix
+
+```bash
+# Preview what would be fixed
+agentlint scan --fix --dry-run
+
+# Apply fixes automatically
+agentlint scan --fix
+```
+
+### Baseline Management
+
+```bash
+# Create baseline from current findings
+agentlint scan --update-baseline
+
+# Subsequent scans automatically suppress baselined findings
+agentlint scan  # "Baseline: 15 known finding(s) suppressed"
+
+# See all findings, ignoring baseline
+agentlint scan --ignore-baseline
+
+# Remove fixed findings from baseline
+agentlint scan --prune-baseline
+
+# Use custom baseline path
+agentlint scan --baseline .agentlint/baseline.json
 ```
 
 ### Filtering

@@ -173,6 +173,43 @@ agentlint init
 agentlint init --ci github  # Include GitHub Actions workflow
 ```
 
+## Auto-Fix
+
+Automatically fix simple issues:
+
+```bash
+# Preview fixes without applying
+agentlint scan --dry-run --fix
+
+# Apply fixes
+agentlint scan --fix
+```
+
+Currently fixable rules:
+- `OBS-002`: Adds permission manifest comment
+
+## Baseline
+
+Suppress known findings to focus on new issues:
+
+```bash
+# Create/update baseline with current findings
+agentlint scan --update-baseline
+
+# Scan respects baseline automatically
+agentlint scan
+# Output: "Baseline: 15 known finding(s) suppressed"
+
+# Ignore baseline to see all findings
+agentlint scan --ignore-baseline
+
+# Remove fixed findings from baseline
+agentlint scan --prune-baseline
+
+# Use custom baseline path
+agentlint scan --baseline path/to/baseline.json
+```
+
 ## Diff Mode
 
 Detect behavioral changes between versions:
@@ -223,7 +260,8 @@ AgentLint is purpose-built for AI agent configs. General linters miss agent-spec
 - [x] VS Code extension
 - [x] GitHub Action (native)
 - [x] Pre-commit hook
-- [ ] Auto-fix for common issues
+- [x] Auto-fix for common issues
+- [x] Baseline support for suppressing known findings
 - [ ] Policy-as-code engine
 - [ ] Signed skill packs
 - [ ] Agent config registry

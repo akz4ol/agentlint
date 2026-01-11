@@ -13,8 +13,10 @@ import { RuleEngine } from '../rules/engine';
 import { generateReport, generateDiffReport } from '../reports';
 import { ReportOptions, ReportFormat } from '../reports/types';
 import { compareScanResults } from '../diff';
+import { Fixer } from '../fixer';
+import { BaselineManager } from '../baseline';
 
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 
 const program = new Command();
 
@@ -45,6 +47,12 @@ program
   .option('--tool <tool>', 'Tool mode: claude|cursor|auto', 'auto')
   .option('--emit-ir', 'Include IR in JSON output')
   .option('--permissions-only', 'Output only recommended permission manifest')
+  .option('--fix', 'Auto-fix fixable issues')
+  .option('--dry-run', 'Show what would be fixed without making changes')
+  .option('--baseline <path>', 'Path to baseline file for suppressing known findings')
+  .option('--update-baseline', 'Update baseline with current findings')
+  .option('--ignore-baseline', 'Ignore baseline and report all findings')
+  .option('--prune-baseline', 'Remove fixed findings from baseline')
   .action(async (scanPath: string | undefined, options) => {
     const globalOpts = program.opts();
     const targetPath = scanPath || process.cwd();
@@ -98,6 +106,111 @@ program
 
     try {
       const result = await scanner.scan();
+
+      // Handle fix mode
+      if (options.fix || options.dryRun) {
+        const fixer = new Fixer({
+          rootDir: path.resolve(targetPath),
+          dryRun: options.dryRun || false,
+        });
+
+        const fixResult = await fixer.fixAll(result.findings, result.capabilitySummary);
+
+        if (options.dryRun) {
+          console.log('Dry run - no changes made\n');
+        }
+
+        if (fixResult.applied > 0) {
+          console.log(`Fixed ${fixResult.applied} issue(s) in ${fixResult.modifiedFiles.length} file(s):`);
+          for (const fix of fixResult.fixes.filter(f => f.success)) {
+            console.log(`  [${fix.ruleId}] ${fix.path}: ${fix.description}`);
+          }
+          console.log();
+        }
+
+        if (fixResult.skipped > 0) {
+          console.log(`Skipped ${fixResult.skipped} issue(s) (not auto-fixable)`);
+          console.log();
+        }
+
+        if (fixResult.errors.length > 0) {
+          console.error('Errors:');
+          fixResult.errors.forEach(e => console.error(`  ${e}`));
+        }
+
+        // Re-scan after fixes if not dry run
+        if (!options.dryRun && fixResult.applied > 0) {
+          const newResult = await scanner.scan();
+          result.findings = newResult.findings;
+          result.exitCode = newResult.exitCode;
+          result.status = newResult.status;
+        }
+      }
+
+      // Handle baseline
+      const baselineManager = new BaselineManager(
+        path.resolve(targetPath),
+        options.baseline
+      );
+
+      if (options.updateBaseline) {
+        // Update baseline with current findings
+        const existed = baselineManager.exists();
+        if (existed) {
+          baselineManager.load();
+        }
+        baselineManager.update(result.findings, 'Baselined via --update-baseline');
+        baselineManager.save();
+
+        const stats = baselineManager.getStats();
+        console.log(`Baseline ${existed ? 'updated' : 'created'}: ${baselineManager.getPath()}`);
+        console.log(`  Total baselined findings: ${stats.total}`);
+        for (const [rule, count] of Object.entries(stats.byRule)) {
+          console.log(`    ${rule}: ${count}`);
+        }
+        console.log();
+      } else if (options.pruneBaseline) {
+        // Remove fixed findings from baseline
+        if (!baselineManager.exists()) {
+          console.error('No baseline file found to prune');
+          process.exit(2);
+        }
+        baselineManager.load();
+        const removed = baselineManager.prune(result.findings);
+        baselineManager.save();
+        console.log(`Pruned ${removed} fixed finding(s) from baseline`);
+        console.log();
+      } else if (!options.ignoreBaseline && baselineManager.exists()) {
+        // Filter findings against baseline
+        baselineManager.load();
+        const { filtered, result: baselineResult } = baselineManager.filterFindings(result.findings);
+
+        if (baselineResult.suppressedFindings > 0) {
+          console.log(`Baseline: ${baselineResult.suppressedFindings} known finding(s) suppressed`);
+          if (baselineResult.fixedFindings > 0) {
+            console.log(`  ${baselineResult.fixedFindings} baselined finding(s) appear to be fixed`);
+          }
+          console.log();
+        }
+
+        // Update result with filtered findings
+        result.findings = filtered;
+
+        // Recalculate exit code based on filtered findings
+        const highCount = filtered.filter(f => f.severity === 'high').length;
+        const mediumCount = filtered.filter(f => f.severity === 'medium').length;
+
+        if (highCount > 0 && ['high'].includes(policy.policy.fail_on)) {
+          result.exitCode = 1;
+          result.status = 'fail';
+        } else if (mediumCount > 0 && ['medium', 'high'].includes(policy.policy.fail_on)) {
+          result.exitCode = 1;
+          result.status = 'fail';
+        } else if (filtered.length === 0) {
+          result.exitCode = 0;
+          result.status = 'pass';
+        }
+      }
 
       // Handle permissions-only mode
       if (options.permissionsOnly) {
