@@ -16,7 +16,7 @@ import { compareScanResults } from '../diff';
 import { Fixer } from '../fixer';
 import { BaselineManager } from '../baseline';
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 
 const program = new Command();
 

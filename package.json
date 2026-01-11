@@ -1,6 +1,6 @@
 {
   "name": "agentlint",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Static analysis and security scanner for AI agent configuration files",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
