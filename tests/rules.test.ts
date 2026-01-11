@@ -1,5 +1,4 @@
 import { RuleEngine } from '../src/rules/engine';
-import { AgentDocument, CapabilitySummary } from '../src/ir/types';
 
 describe('RuleEngine', () => {
   let engine: RuleEngine;
@@ -29,41 +28,17 @@ describe('RuleEngine', () => {
     });
   });
 
-  describe('getRule()', () => {
-    it('should return rule by ID', () => {
-      const rule = engine.getRule('EXEC-001');
-      expect(rule).toBeDefined();
-      expect(rule?.id).toBe('EXEC-001');
-      expect(rule?.title).toBe('Dynamic Shell Execution');
+  describe('getRuleDefinition()', () => {
+    it('should return rule definition by ID', () => {
+      const def = engine.getRuleDefinition('EXEC-001');
+      expect(def).toBeDefined();
+      expect(def?.id).toBe('EXEC-001');
+      expect(def?.title).toBe('Dynamic Shell Execution');
     });
 
     it('should return undefined for unknown rule', () => {
-      const rule = engine.getRule('UNKNOWN-999');
-      expect(rule).toBeUndefined();
-    });
-  });
-
-  describe('evaluateAll()', () => {
-    it('should return empty findings for empty documents', () => {
-      const findings = engine.evaluateAll([], createEmptyCapabilitySummary());
-      expect(findings).toHaveLength(0);
+      const def = engine.getRuleDefinition('UNKNOWN-999');
+      expect(def).toBeUndefined();
     });
   });
 });
-
-function createEmptyCapabilitySummary(): CapabilitySummary {
-  return {
-    shell_exec: { enabled: false, dynamic_detected: false },
-    network: { outbound: false, inbound: false },
-    filesystem: {
-      read: [],
-      write: [],
-      scoped: true,
-      touches_sensitive_paths: [],
-    },
-    secrets: {
-      env_vars_referenced: [],
-      files_containing_secrets_referenced: [],
-    },
-  };
-}

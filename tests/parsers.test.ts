@@ -1,26 +1,38 @@
 import { ParserFactory } from '../src/parsers/factory';
 import { ClaudeParser } from '../src/parsers/claude';
 import { CursorParser } from '../src/parsers/cursor';
+import { ParserOptions } from '../src/parsers/base';
+
+const defaultOptions: ParserOptions = {
+  sourceId: 'test',
+  minConfidence: 0.5,
+};
 
 describe('ParserFactory', () => {
+  let factory: ParserFactory;
+
+  beforeEach(() => {
+    factory = new ParserFactory(defaultOptions);
+  });
+
   describe('getParser()', () => {
     it('should return ClaudeParser for CLAUDE.md', () => {
-      const parser = ParserFactory.getParser('CLAUDE.md');
+      const parser = factory.getParser('CLAUDE.md');
       expect(parser).toBeInstanceOf(ClaudeParser);
     });
 
     it('should return ClaudeParser for .claude/skills/test.md', () => {
-      const parser = ParserFactory.getParser('.claude/skills/test.md');
+      const parser = factory.getParser('.claude/skills/test.md');
       expect(parser).toBeInstanceOf(ClaudeParser);
     });
 
     it('should return CursorParser for .cursorrules', () => {
-      const parser = ParserFactory.getParser('.cursorrules');
+      const parser = factory.getParser('.cursorrules');
       expect(parser).toBeInstanceOf(CursorParser);
     });
 
     it('should return ClaudeParser for AGENTS.md', () => {
-      const parser = ParserFactory.getParser('AGENTS.md');
+      const parser = factory.getParser('AGENTS.md');
       expect(parser).toBeInstanceOf(ClaudeParser);
     });
   });
@@ -30,7 +42,7 @@ describe('ClaudeParser', () => {
   let parser: ClaudeParser;
 
   beforeEach(() => {
-    parser = new ClaudeParser();
+    parser = new ClaudeParser(defaultOptions);
   });
 
   describe('canHandle()', () => {
@@ -50,18 +62,20 @@ describe('ClaudeParser', () => {
   describe('parse()', () => {
     it('should parse simple CLAUDE.md', () => {
       const content = '# Project Guidelines\n\nThis is a test project.';
-      const doc = parser.parse('CLAUDE.md', content);
+      const result = parser.parse('CLAUDE.md', content);
 
-      expect(doc.path).toBe('CLAUDE.md');
-      expect(doc.tool_family).toBe('claude');
-      expect(doc.doc_type).toBe('memory');
+      expect(result.document).not.toBeNull();
+      expect(result.document?.path).toBe('CLAUDE.md');
+      expect(result.document?.tool_family).toBe('claude');
+      expect(result.document?.doc_type).toBe('memory');
     });
 
     it('should detect shell execution patterns', () => {
       const content = '# Deploy\n\nRun `npm run build` to build.';
-      const doc = parser.parse('.claude/skills/deploy.md', content);
+      const result = parser.parse('.claude/skills/deploy.md', content);
 
-      const shellActions = doc.actions.filter((a) => a.type === 'shell_exec');
+      expect(result.document).not.toBeNull();
+      const shellActions = result.document?.actions.filter((a) => a.type === 'shell_exec') || [];
       expect(shellActions.length).toBeGreaterThan(0);
     });
   });
