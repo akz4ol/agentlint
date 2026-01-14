@@ -7,8 +7,6 @@ import { BaseParser, ParserResult, ParserOptions } from './base';
 import {
   AgentDocument,
   ContextType,
-  DocFormat,
-  DocType,
   InstructionBlock,
   ToolFamily,
 } from '../ir/types';
@@ -77,8 +75,8 @@ export class CursorParser extends BaseParser {
   private parseRulesContent(
     doc: AgentDocument,
     content: string,
-    errors: string[],
-    warnings: string[]
+    _errors: string[],
+    _warnings: string[]
   ): void {
     const lines = content.split('\n');
     const context: ContextType = 'interactive';

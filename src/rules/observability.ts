@@ -3,9 +3,9 @@
  * Rules for ensuring visibility and auditability
  */
 
-import { Finding } from '../ir/types';
+import { Finding, CapabilityType } from '../ir/types';
 import { BaseRule } from './base';
-import { RuleContext, RuleDefinition } from './types';
+import { RuleContext } from './types';
 
 /**
  * OBS-001: Missing Capability Declaration
@@ -28,7 +28,7 @@ export class MissingCapabilityDeclarationRule extends BaseRule {
 
   evaluate(context: RuleContext): Finding[] {
     const findings: Finding[] = [];
-    const { document, capabilitySummary } = context;
+    const { document } = context;
 
     // Check for undeclared action types
     const actionTypes = new Set(document.actions.map(a => a.type));
@@ -45,7 +45,7 @@ export class MissingCapabilityDeclarationRule extends BaseRule {
 
     for (const actionType of actionTypes) {
       const expectedCap = actionToCapability[actionType];
-      if (expectedCap && !declaredCapabilities.has(expectedCap as any)) {
+      if (expectedCap && !declaredCapabilities.has(expectedCap as CapabilityType)) {
         // Find an action of this type for location
         const action = document.actions.find(a => a.type === actionType);
         if (action) {

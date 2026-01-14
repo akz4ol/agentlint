@@ -61,7 +61,7 @@ export class JsonReportGenerator {
 
     // Remove permission manifest if not requested
     if (!this.options.includePermissionManifest) {
-      delete (report as any).recommended_permissions;
+      delete (report as Partial<AgentLintReport>).recommended_permissions;
     }
 
     return report;

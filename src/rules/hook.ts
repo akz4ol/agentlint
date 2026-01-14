@@ -5,7 +5,7 @@
 
 import { Finding } from '../ir/types';
 import { BaseRule } from './base';
-import { RuleContext, RuleDefinition } from './types';
+import { RuleContext } from './types';
 
 /**
  * HOOK-001: Auto-Triggered Hook with Side Effects
@@ -108,7 +108,7 @@ export class HiddenHookActivationRule extends BaseRule {
 
   evaluate(context: RuleContext): Finding[] {
     const findings: Finding[] = [];
-    const { document, minConfidence } = context;
+    const { document } = context;
 
     // Only applies to hook context
     if (document.doc_type !== 'hook') {

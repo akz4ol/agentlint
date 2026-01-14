@@ -5,7 +5,7 @@
 
 import { Finding } from '../ir/types';
 import { BaseRule } from './base';
-import { RuleContext, RuleDefinition } from './types';
+import { RuleContext } from './types';
 
 // Sensitive paths that should trigger alerts
 const SENSITIVE_PATHS = [

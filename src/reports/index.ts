@@ -3,7 +3,7 @@ export * from './text';
 export * from './json';
 export * from './sarif';
 
-import { ReportData, ReportOptions, ReportFormat } from './types';
+import { ReportData, ReportOptions } from './types';
 import { TextReportGenerator, generateDiffTextReport } from './text';
 import { JsonReportGenerator, generateDiffJsonReport } from './json';
 import { SarifReportGenerator, generateDiffSarifReport } from './sarif';

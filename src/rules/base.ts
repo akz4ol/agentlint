@@ -2,7 +2,7 @@
  * Base rule class with common functionality
  */
 
-import { Finding, AgentDocument, Severity, Evidence, Anchors } from '../ir/types';
+import { Finding, AgentDocument, Evidence, Anchors } from '../ir/types';
 import { Rule, RuleDefinition, RuleContext } from './types';
 import {
   generateFindingId,

@@ -5,7 +5,7 @@
 
 import { Finding } from '../ir/types';
 import { BaseRule } from './base';
-import { RuleContext, RuleDefinition } from './types';
+import { RuleContext } from './types';
 
 // Patterns that indicate instruction override attempts
 const OVERRIDE_PATTERNS = [

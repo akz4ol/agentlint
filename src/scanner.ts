@@ -13,17 +13,17 @@ import {
   DocumentSummary,
   Finding,
   PermissionManifest,
-  ReportSummary,
   ScanStatus,
   PERMISSIONS_VERSION,
   REPORT_VERSION,
   IR_SCHEMA_VERSION,
+  Severity,
 } from './ir/types';
 import { ParserFactory } from './parsers/factory';
 import { RuleEngine } from './rules/engine';
 import { PolicyConfig, DEFAULT_POLICY } from './policy/types';
-import { generateId, sha256 } from './utils/hash';
-import { ReportData, ReportOptions } from './reports/types';
+import { generateId } from './utils/hash';
+import { ReportData } from './reports/types';
 
 export interface ScanOptions {
   root: string;
@@ -345,7 +345,7 @@ export class Scanner {
 
     // Check for high severity findings
     if (policy.fail_on !== 'none') {
-      const failFindings = this.ruleEngine.filterBySeverity(findings, policy.fail_on as any);
+      const failFindings = this.ruleEngine.filterBySeverity(findings, policy.fail_on as Severity);
       if (failFindings.length > 0) {
         return { status: 'fail', exitCode: 1 };
       }
@@ -353,7 +353,7 @@ export class Scanner {
 
     // Check for warning severity findings
     if (policy.warn_on !== 'none') {
-      const warnFindings = this.ruleEngine.filterBySeverity(findings, policy.warn_on as any);
+      const warnFindings = this.ruleEngine.filterBySeverity(findings, policy.warn_on as Severity);
       if (warnFindings.length > 0) {
         return { status: 'warn', exitCode: 0 };
       }

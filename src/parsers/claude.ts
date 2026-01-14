@@ -154,8 +154,8 @@ export class ClaudeParser extends BaseParser {
   private parseShellContent(
     doc: AgentDocument,
     content: string,
-    errors: string[],
-    warnings: string[]
+    _errors: string[],
+    _warnings: string[]
   ): void {
     const lines = content.split('\n');
     const context: ContextType = doc.doc_type === 'hook' ? 'hook' : 'interactive';
@@ -239,8 +239,8 @@ export class ClaudeParser extends BaseParser {
   private parseMarkdownContent(
     doc: AgentDocument,
     content: string,
-    errors: string[],
-    warnings: string[]
+    _errors: string[],
+    _warnings: string[]
   ): void {
     const lines = content.split('\n');
     const context: ContextType = doc.doc_type === 'hook' ? 'hook' : 'interactive';

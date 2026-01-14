@@ -5,7 +5,7 @@
 
 import { Finding } from '../ir/types';
 import { BaseRule } from './base';
-import { RuleContext, RuleDefinition } from './types';
+import { RuleContext } from './types';
 
 // Known secret environment variables
 const KNOWN_SECRET_VARS = [

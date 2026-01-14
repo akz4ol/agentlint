@@ -10,7 +10,6 @@ import {
   DocumentSummary,
   DiffResult,
   ScanStatus,
-  Severity,
 } from '../ir/types';
 
 export type ReportFormat = 'text' | 'json' | 'sarif';

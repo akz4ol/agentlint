@@ -5,18 +5,13 @@
 import {
   AgentDocument,
   Action,
-  ActionType,
   Capability,
   ContextProfile,
   ContextType,
   DocFormat,
   DocType,
-  Evidence,
-  InstructionBlock,
-  ParseResult,
   ToolFamily,
   Anchors,
-  DocumentLink,
   ShellDetails,
   NetworkDetails,
   FilesystemDetails,
@@ -263,7 +258,6 @@ export abstract class BaseParser {
    * Derive capabilities from actions
    */
   protected deriveCapabilities(actions: Action[]): Capability[] {
-    const capabilities: Capability[] = [];
     const capMap: Map<CapabilityType, Capability> = new Map();
 
     for (const action of actions) {
@@ -386,7 +380,7 @@ export abstract class BaseParser {
    */
   protected extractDomain(url: string): string | null {
     try {
-      const match = url.match(/(?:https?:\/\/)?([^\/\s:]+)/);
+      const match = url.match(/(?:https?:\/\/)?([^/\s:]+)/);
       return match ? match[1] : null;
     } catch {
       return null;

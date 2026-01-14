@@ -2,8 +2,6 @@
  * Fixer types and interfaces
  */
 
-import { Finding } from '../ir/types';
-
 /**
  * A fix that can be applied to a file
  */

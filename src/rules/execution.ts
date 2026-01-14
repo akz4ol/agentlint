@@ -5,7 +5,7 @@
 
 import { Finding } from '../ir/types';
 import { BaseRule } from './base';
-import { RuleContext, RuleDefinition } from './types';
+import { RuleContext } from './types';
 
 /**
  * EXEC-001: Dynamic Shell Execution

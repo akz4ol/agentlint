@@ -2,8 +2,8 @@
  * Diff functionality for comparing agent configuration versions
  */
 
-import { CapabilitySummary, DiffChange, DiffResult, Finding, ScanStatus, Severity } from '../ir/types';
-import { ScanResult, Scanner, ScanOptions } from '../scanner';
+import { CapabilitySummary, DiffChange, DiffResult, Finding, ScanStatus } from '../ir/types';
+import { ScanResult } from '../scanner';
 import { PolicyConfig } from '../policy/types';
 import { generateId } from '../utils/hash';
 

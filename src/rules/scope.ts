@@ -6,8 +6,7 @@
 
 import { Finding, CapabilitySummary } from '../ir/types';
 import { BaseRule } from './base';
-import { RuleContext, RuleDefinition } from './types';
-import { generateId } from '../utils/hash';
+import { RuleContext } from './types';
 
 /**
  * SCOPE-001: Capability Expansion Between Versions
